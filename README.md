@@ -1,1 +1,1 @@
-# Dr. Fizzlesticks's Wonderous Modular Miner
+# Dr. Fizzlesticks's Wondrous Modular Miner
