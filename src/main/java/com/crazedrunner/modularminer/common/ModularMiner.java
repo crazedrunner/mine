@@ -1,7 +1,9 @@
 package com.crazedrunner.modularminer.common;
 
 
-import com.crazedrunner.modularminer.util.RegistryHandler;
+import com.crazedrunner.modularminer.common.util.registries.BlockRegistryHandler;
+import com.crazedrunner.modularminer.common.util.registries.ItemRegistryHandler;
+import com.crazedrunner.modularminer.common.util.registries.TileEntityRegistryHandler;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.common.MinecraftForge;
@@ -25,7 +27,9 @@ public final class ModularMiner{
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::setup);
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::doClientStuff);
 
-        RegistryHandler.init();
+        ItemRegistryHandler.init();
+        BlockRegistryHandler.init();
+        TileEntityRegistryHandler.init();
 
         MinecraftForge.EVENT_BUS.register(this);
     }
@@ -37,7 +41,7 @@ public final class ModularMiner{
     public static final ItemGroup TAB = new ItemGroup("modularMiner"){
         @Override
         public ItemStack createIcon(){
-            return new ItemStack(RegistryHandler.BORE.get());
+            return new ItemStack(ItemRegistryHandler.BORE.get());
         }
     };
 }

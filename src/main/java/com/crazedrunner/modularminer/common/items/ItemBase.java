@@ -1,4 +1,4 @@
-package com.crazedrunner.modularminer.items;
+package com.crazedrunner.modularminer.common.items;
 
 import com.crazedrunner.modularminer.common.ModularMiner;
 import net.minecraft.item.Item;

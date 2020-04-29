@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "": [
+      { "model": "modularminer:block/miner_controller" }
+    ]
+  }
+}
