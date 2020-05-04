@@ -1,0 +1,28 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern":
+  [
+    "x a",
+    "xb ",
+    "xxx"
+  ],
+  "key":
+  {
+    "x":
+    {
+      "tag": "forge:ingots/iron"
+    },
+    "a":
+    {
+      "tag": "minecraft:planks"
+    },
+    "b":
+    {
+      "tag": "forge:stone"
+    }
+  },
+  "result":
+  {
+    "item": "modularminer:bore"
+  }
+}
