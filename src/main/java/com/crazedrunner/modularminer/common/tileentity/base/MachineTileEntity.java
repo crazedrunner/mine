@@ -1,9 +1,7 @@
-package com.crazedrunner.modularminer.common.tileentity;
+package com.crazedrunner.modularminer.common.tileentity.base;
 
 import com.crazedrunner.modularminer.common.capability.MinerEnergy;
 import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.tileentity.ITickableTileEntity;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityType;
 import net.minecraft.util.Direction;
 import net.minecraftforge.common.capabilities.Capability;
@@ -11,16 +9,16 @@ import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.energy.CapabilityEnergy;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-public class MachineTileEntity extends TileEntity implements ITickableTileEntity {
+public class MachineTileEntity extends ModularDeviceEntity {
     private static final String TICK_TAG = "tick";
     private static final String ENERGY_TAG = "energy";
     private static final String ENERGY_PER_TICK_TAG = "energy_per_tick";
     private static final String TICKS_TO_COMPLETE_TAG = "ticks_to_complete";
 
-    private int tick = 0;
     private int ticksToComplete = 0;
     private int energyPerTick = 0;
 
@@ -36,40 +34,20 @@ public class MachineTileEntity extends TileEntity implements ITickableTileEntity
 
     @Override
     public void tick() {
-        if (world != null || !world.isRemote()) {
-
+        if (world != null && !world.isRemote()) {
             if (canOperate()) {
                 if (tick >= ticksToComplete) {
-                    resetTickCount();
+                    resetTick();
                 }
                 energy.extractEnergy(energyPerTick, false);
-                tick++;
-            } else {
-                tick--;
             }
         }
+        super.tick();
     }
 
     public boolean canOperate() {
-
-        if(energy == null){
-            LOGGER.debug("Energy is null.");
-            LOGGER.debug("WORLD " + world.isRemote);
-            return false;
-        }
-        if ( energy.getEnergyStored() <= 0) {
-            LOGGER.debug("No energy fired!  Energy : "  + energy.getEnergyStored());
-            return false;
-        }
-        if (energy.extractEnergy(energyPerTick, true) < energyPerTick) {
-            LOGGER.debug("Not enough energy to run!");
-            return false;
-        }
-        return true;
-    }
-
-    public void resetTickCount() {
-        tick = 0;
+        return energy != null &&
+                energy.extractEnergy(energyPerTick, true) >= energyPerTick;
     }
 
     @Override
@@ -85,7 +63,7 @@ public class MachineTileEntity extends TileEntity implements ITickableTileEntity
     @Nonnull
     public CompoundNBT write(final CompoundNBT nbt) {
         super.write(nbt);
-        nbt.putInt(TICK_TAG, tick);
+         nbt.putInt(TICK_TAG, tick);
         nbt.putInt(ENERGY_TAG, energy.getEnergyStored());
         nbt.putInt(ENERGY_PER_TICK_TAG, energyPerTick);
         return nbt;
@@ -98,14 +76,6 @@ public class MachineTileEntity extends TileEntity implements ITickableTileEntity
             return energyCapabilityExternal.cast();
         }
         return super.getCapability(cap, side);
-    }
-
-
-    /*
-        @return
-     */
-    public int getTick() {
-        return tick;
     }
 
     public boolean isOperationFinished() {

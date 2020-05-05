@@ -1,8 +1,9 @@
 package com.crazedrunner.modularminer.common.util.registries;
 
 import com.crazedrunner.modularminer.common.ModularMiner;
+import com.crazedrunner.modularminer.common.tileentity.CreativeBatteryEntity;
+import com.crazedrunner.modularminer.common.tileentity.MinerControllerEntity;
 import com.crazedrunner.modularminer.common.tileentity.MinerTileEntity;
-import com.crazedrunner.modularminer.common.util.registries.BlockRegistryHandler;
 import net.minecraft.tileentity.TileEntityType;
 import net.minecraftforge.fml.RegistryObject;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
@@ -22,9 +23,24 @@ public class TileEntityRegistryHandler {
         .register("miner",
                 () -> {
                     return TileEntityType.Builder
-                            .create(() -> new MinerTileEntity(), BlockRegistryHandler.MINER.get())
+                            .create(MinerTileEntity::new, BlockRegistryHandler.MINER.get())
                             .build(null);
                 }
         );
 
+    public static final RegistryObject<TileEntityType<?>> CREATIVE_BATTERY_ENTITY = TILE_ENTITY_TYPES
+            .register("creative_battery",
+                    () -> {
+                        return TileEntityType.Builder
+                                .create(CreativeBatteryEntity::new,
+                                        BlockRegistryHandler.CREATIVE_BATTERY.get())
+                                .build(null);
+                    });
+
+    public static final RegistryObject<TileEntityType<?>> MINER_CONTROLLER_ENTITY = TILE_ENTITY_TYPES
+            .register("miner_controller_entity",
+                    () -> {
+                return TileEntityType.Builder.create(MinerControllerEntity::new,
+                        BlockRegistryHandler.MINER_CONTROLLER.get()).build(null);
+                    });
 }

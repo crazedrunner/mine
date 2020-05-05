@@ -12,11 +12,9 @@ import net.minecraftforge.registries.ForgeRegistries;
 public class ItemRegistryHandler {
 
     public static final DeferredRegister<Item> ITEMS = new DeferredRegister<>(ForgeRegistries.ITEMS, ModularMiner.MOD_ID);
-    public static final DeferredRegister<Block> BLOCKS = new DeferredRegister<>(ForgeRegistries.BLOCKS, ModularMiner.MOD_ID);
 
     public static void init(){
         ITEMS.register(FMLJavaModLoadingContext.get().getModEventBus());
-        BLOCKS.register(FMLJavaModLoadingContext.get().getModEventBus());
     }
 
     // Items

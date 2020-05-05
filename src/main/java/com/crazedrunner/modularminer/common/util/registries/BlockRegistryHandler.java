@@ -2,6 +2,7 @@ package com.crazedrunner.modularminer.common.util.registries;
 
 import com.crazedrunner.modularminer.common.ModularMiner;
 import com.crazedrunner.modularminer.common.blockItems.BlockItemBase;
+import com.crazedrunner.modularminer.common.blocks.CreativeBattery;
 import com.crazedrunner.modularminer.common.blocks.Miner;
 import com.crazedrunner.modularminer.common.blocks.MinerController;
 import net.minecraft.block.Block;
@@ -29,25 +30,18 @@ public class BlockRegistryHandler {
     public static final RegistryObject<Block> MINER =
             BLOCKS.register("miner", Miner::new);
 
+    public static final RegistryObject<Block> CREATIVE_BATTERY =
+            BLOCKS.register("creative_battery", CreativeBattery::new);
+
     public static final RegistryObject<Item> MINER_CONTROLLER_ITEM =
             BLOCK_ITEMS.register("miner_controller",
-                    () -> new BlockItemBase(
-                            MINER_CONTROLLER.get(),
-                            new Item
-                                    .Properties()
-                                    .group(ModularMiner.TAB)
-                    )
-            );
+                    () -> new BlockItemBase(MINER_CONTROLLER.get()));
 
     public static final RegistryObject<Item> MINER_ITEM =
-            BLOCK_ITEMS
-                    .register("miner",
-                            () ->
-                                    new BlockItemBase(
-                                            MINER.get(),
-                                            new Item
-                                                    .Properties()
-                                                    .group(ModularMiner.TAB)
-                                    )
-                    );
+            BLOCK_ITEMS.register("miner",
+                    () -> new BlockItemBase(MINER.get()));
+
+    public static final RegistryObject<Item> CREATIVE_BATTERY_ITEM =
+            BLOCK_ITEMS.register("creative_battery",
+                    ()-> new BlockItemBase(CREATIVE_BATTERY.get()));
 }

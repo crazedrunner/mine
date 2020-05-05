@@ -1,5 +1,6 @@
 package com.crazedrunner.modularminer.common.tileentity;
 
+import com.crazedrunner.modularminer.common.tileentity.base.MachineTileEntity;
 import com.crazedrunner.modularminer.common.util.registries.TileEntityRegistryHandler;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -14,10 +15,7 @@ import net.minecraft.util.Direction;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
-import net.minecraft.world.chunk.Chunk;
 import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.extensions.IForgeBlockState;
-import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.common.util.LazyOptional;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -25,12 +23,12 @@ import org.apache.logging.log4j.Logger;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.HashSet;
-import java.util.Set;
 
-public class MinerTileEntity extends MachineTileEntity{
+public class MinerTileEntity extends MachineTileEntity {
     private static final String BLOCK_TO_MINE_POS_TAG = "BLOCK_TO_MINE_POS";
     private static final String MINER_INDEX_TAG = "MINER_INDEX";
     private BlockPos blockToMinePos;
+    // TODO: Set base speed as a config parameter
     public int baseSpeed = 10;
     private int minerIndex = 0;
     private boolean initialized = false;
@@ -49,78 +47,62 @@ public class MinerTileEntity extends MachineTileEntity{
 
     @Override
     public void tick() {
-        if(world == null || world.isRemote ){
-            return;
-        }
-
-        if(!initialized){
-            init();
-        }
-
-        super.tick();
-
-        if (!canOperate()){
-            return;
-        }
-
-        BlockState blockstate = world.getBlockState(blockToMinePos);
-
-        if (!blockstate.isSolid()){
-            LOGGER.debug("Block is not solid at: " + blockToMinePos.toString());
-            blockToMinePos = getNextBlockPosition();
-            return;
-        }
-
-        HashSet< ResourceLocation> tags = new HashSet<>(blockstate.getBlock().getTags());
-
-        LOGGER.debug("Tags: " + tags.toString());
-        if(isOperationFinished()){
-            destroyBlock(blockToMinePos, true, null);
-            blockToMinePos = getNextBlockPosition();
+        if(world != null && !world.isRemote){
+            if(!initialized){
+                init();
+            }
+            if(canOperate()){
+                LOGGER.debug("canOperate fired!");
+                BlockState blockState = world.getBlockState(blockToMinePos);
+                if(blockState.isSolid()){
+                    LOGGER.debug("Current tick count: " + tick);
+                    HashSet<ResourceLocation> blockTags = new HashSet<>(blockState.getBlock().getTags());
+                    if(isOperationFinished()){
+                        destroyBlock(blockState, true);
+                        blockToMinePos = getNextBlockPosition();
+                    }
+                }
+                else{
+                    blockToMinePos = getNextBlockPosition();
+                }
+                super.tick();
+            }
         }
     }
 
     private void init() {
-        initialized = true;
-        currentChunk = world.getChunkAt(pos).getPos();
-        blockToMinePos = getNextBlockPosition();
-        setEnergyPerTick(10);
-        energy.setEnergy(100000);
+        if(world != null) {
+            initialized = true;
+            currentChunk = world.getChunkAt(pos).getPos();
+            blockToMinePos = getNextBlockPosition();
+            setEnergyPerTick(10);
+            energy.setEnergy(100000);
+        }
     }
 
     private int getTicksToMine(BlockPos currentBlock){
-        if (world == null || currentBlock == null){
-            return 0;
+        if(world != null && currentBlock != null){
+            BlockState blockState = world.getBlockState(currentBlock);
+            if(blockState.isSolid()){
+                int hardness = (int) Math.floor(blockState.getBlockHardness(world, currentBlock));
+                int timeToMine = this.baseSpeed * hardness;
+                return Math.max(1, timeToMine);
+            }
         }
-
-        BlockState state = world.getBlockState(currentBlock);
-
-        if(!state.isSolid()){
-            return 0;
-        }
-
-        int timeToMine = (int) Math.floor(
-                this.baseSpeed * state.getBlockHardness(world, currentBlock)
-        );
-        return Math.max(1, timeToMine);
+        return 0;
     }
 
 
-    private boolean destroyBlock(BlockPos blockPos, boolean dropBlock, @Nullable Entity entity){
-        BlockState blockstate = world.getBlockState(blockPos);
-        if (blockstate.isAir(world, blockPos)){
-            return false;
+    private boolean destroyBlock(BlockState blockState, boolean dropBlock){
+        if(world != null) {
+            world.playEvent(2001, blockToMinePos, Block.getStateId(blockState));
+            if (dropBlock) {
+                TileEntity tileEntity = blockState.hasTileEntity() ? world.getTileEntity(blockToMinePos) : null;
+                Block.spawnDrops(blockState, world, this.pos.add(0, 2, 0), tileEntity, null, ItemStack.EMPTY);
+            }
+            return world.removeBlock(blockToMinePos, false);
         }
-        IFluidState ifluidstate = world.getFluidState(pos);
-        world.playEvent(2001, blockPos, Block.getStateId(blockstate));
-        if (dropBlock){
-            TileEntity tileEntity = blockstate.hasTileEntity() ? world.getTileEntity(blockPos) : null;
-            Block.spawnDrops(blockstate, world, this.pos.add(0, 2, 0), tileEntity, entity, ItemStack.EMPTY);
-        }
-        return world.removeBlock(blockPos, false);
-        //return world.setBlockState(blockPos, ifluidstate.getBlockState(), 3);
-
-
+        return false;
     }
 
     private BlockPos getNextBlockPosition() {
@@ -131,14 +113,14 @@ public class MinerTileEntity extends MachineTileEntity{
         int z = (minerIndex / 16) % 16;
 
         BlockPos nextBlockPos = world.getChunkAt(pos).getPos().getBlock(x,y, z);
-        LOGGER.debug("New Block Position to mine: "
-                + Integer.toString(nextBlockPos.getX()) + ", "
-                + Integer.toString(nextBlockPos.getY()) + ", "
-                + Integer.toString(nextBlockPos.getZ()));
+//        LOGGER.debug("New Block Position to mine: "
+//                + Integer.toString(nextBlockPos.getX()) + ", "
+//                + Integer.toString(nextBlockPos.getY()) + ", "
+//                + Integer.toString(nextBlockPos.getZ()));
 
         minerIndex++;
 
-        resetTickCount();
+        resetTick();
         setTicksToComplete(getTicksToMine(nextBlockPos));
 
         return nextBlockPos;

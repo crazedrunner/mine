@@ -1,5 +1,7 @@
 {
   "item.modularminer.bore" : "Bore",
   "itemGroup.modularMiner": "Modular Miner",
-  "block.modularminer.miner_controller": "Miner Controller"
+  "block.modularminer.miner_controller": "Miner Controller",
+  "block.modularminer.miner": "Miner",
+  "block.modularminer.creative_battery": "Creative Battery"
 }
