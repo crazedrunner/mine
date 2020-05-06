@@ -52,10 +52,8 @@ public class MinerTileEntity extends MachineTileEntity {
                 init();
             }
             if(canOperate()){
-                LOGGER.debug("canOperate fired!");
                 BlockState blockState = world.getBlockState(blockToMinePos);
                 if(blockState.isSolid()){
-                    LOGGER.debug("Current tick count: " + tick);
                     HashSet<ResourceLocation> blockTags = new HashSet<>(blockState.getBlock().getTags());
                     if(isOperationFinished()){
                         destroyBlock(blockState, true);
